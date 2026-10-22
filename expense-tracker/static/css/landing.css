@@ -219,6 +219,67 @@
 .lp-fill-travel { background: #3988db; }
 .lp-fill-bills { background: #8173e8; }
 
+/* Video modal */
+
+.lp-modal {
+    width: min(960px, calc(100vw - 2rem));
+    max-width: none;
+    margin: auto;
+    padding: 0;
+    border: none;
+    border-radius: 20px;
+    background: transparent;
+    overflow: visible;
+}
+
+.lp-modal::backdrop {
+    background: rgba(17, 17, 17, 0.75);
+}
+
+body:has(.lp-modal[open]) { overflow: hidden; }
+
+.lp-modal-body { position: relative; }
+
+.lp-modal-video {
+    aspect-ratio: 16 / 9;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #000000;
+}
+
+.lp-modal-video iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.lp-modal-close {
+    position: absolute;
+    top: -52px;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #111111;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.lp-modal-close:hover { background: #ececec; }
+
+.lp-modal-close:focus-visible {
+    outline: 3px solid #19a578;
+    outline-offset: 3px;
+}
+
 /* ------------------------------------------------------------------ */
 /* Responsive                                                          */
 /* ------------------------------------------------------------------ */

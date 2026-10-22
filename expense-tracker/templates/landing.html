@@ -30,7 +30,7 @@
 
         <div class="lp-actions">
             <a href="{{ url_for('register') }}" class="lp-btn">Create free account</a>
-            <a href="#preview" class="lp-btn" aria-label="See how it works: scroll to the dashboard preview">See how it works</a>
+            <a href="#preview" class="lp-btn" id="lp-video-open" aria-haspopup="dialog" aria-label="See how it works: watch the product video">See how it works</a>
         </div>
     </div>
 
@@ -82,6 +82,18 @@
     </figure>
 </section>
 
+{# Video modal. Replace data-video-src with the real embed URL later. #}
+<dialog class="lp-modal" id="lp-video-modal" aria-label="How Spendly works"
+        data-video-src="https://www.youtube-nocookie.com/embed/M7lc1UVf-VE?autoplay=1&rel=0">
+    <div class="lp-modal-body">
+        <button type="button" class="lp-modal-close" id="lp-video-close" aria-label="Close video">&times;</button>
+        <div class="lp-modal-video">
+            <iframe id="lp-video-frame" src="about:blank" title="How Spendly works"
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+        </div>
+    </div>
+</dialog>
+
 <section class="features">
     <div class="features-inner">
         <div class="feature-card">
@@ -110,4 +122,39 @@
     </div>
 </section>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        var modal = document.getElementById('lp-video-modal');
+        var frame = document.getElementById('lp-video-frame');
+        var openBtn = document.getElementById('lp-video-open');
+        var closeBtn = document.getElementById('lp-video-close');
+
+        // Without <dialog> support the link keeps its default scroll-to-preview behaviour.
+        if (!modal || typeof modal.showModal !== 'function') return;
+
+        openBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+            frame.src = modal.dataset.videoSrc;
+            modal.showModal();
+        });
+
+        closeBtn.addEventListener('click', function () {
+            modal.close();
+        });
+
+        // Clicks on the backdrop land on the <dialog> itself, not on its content.
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) modal.close();
+        });
+
+        // Fires for every close path (button, backdrop, Escape): unload the
+        // player so the video stops instead of playing in the background.
+        modal.addEventListener('close', function () {
+            frame.src = 'about:blank';
+        });
+    })();
+</script>
 {% endblock %}
