@@ -1,0 +1,254 @@
+/* ------------------------------------------------------------------ */
+/* Landing hero                                                        */
+/* Scoped with the lp- prefix so it never collides with style.css.     */
+/* ------------------------------------------------------------------ */
+
+.lp-hero {
+    --lp-ink: #111111;
+    --lp-green: #19a578;
+    --lp-green-bg: #e9f7f1;
+    --lp-green-border: #a8dfc9;
+    --lp-gray: #6b6b6b;
+    --lp-gray-soft: #8a8a8a;
+    --lp-red: #d9534f;
+    --lp-panel: #f7f6f3;
+    --lp-panel-border: #e6e2d9;
+    --lp-card-border: #ece9e2;
+    --lp-track: #efece6;
+
+    background: #ffffff;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color: var(--lp-ink);
+    padding: 5.5rem 1.5rem 6rem;
+    overflow-x: hidden;
+}
+
+.lp-hero-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Badge */
+
+.lp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1.1rem;
+    background: var(--lp-green-bg);
+    border: 1px solid var(--lp-green-border);
+    border-radius: 999px;
+    color: var(--lp-green);
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.lp-badge-dot { font-size: 0.7rem; }
+
+/* Heading */
+
+.lp-title {
+    margin-top: 2rem;
+    font-size: 72px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    color: var(--lp-ink);
+}
+
+.lp-title-line { display: block; }
+.lp-title-accent { color: var(--lp-green); }
+
+/* Description */
+
+.lp-subtitle {
+    margin-top: 1.75rem;
+    max-width: 750px;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--lp-gray);
+}
+
+/* Buttons */
+
+.lp-actions {
+    margin-top: 2.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.lp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 66px;
+    padding: 0 2.5rem;
+    background: #111111;
+    color: #ffffff;
+    border-radius: 16px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.lp-btn:hover {
+    background: #2a2a2a;
+    transform: translateY(-1px);
+}
+
+.lp-btn:focus-visible {
+    outline: 3px solid var(--lp-green);
+    outline-offset: 3px;
+}
+
+/* Dashboard preview */
+
+.lp-preview {
+    max-width: 1000px;
+    margin: 4.5rem auto 0;
+    padding: 28px;
+    background: var(--lp-panel);
+    border: 1px solid var(--lp-panel-border);
+    border-radius: 24px;
+    scroll-margin-top: 84px; /* clear the sticky navbar */
+}
+
+.lp-preview-dots {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.lp-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.lp-dot-red { background: #e8a29b; }
+.lp-dot-yellow { background: #f1d27c; }
+.lp-dot-green { background: #9fdcc2; }
+
+.lp-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.lp-stat,
+.lp-categories {
+    background: #ffffff;
+    border: 1px solid var(--lp-card-border);
+    border-radius: 16px;
+}
+
+.lp-stat {
+    padding: 1.4rem 1.5rem;
+    text-align: left;
+}
+
+.lp-stat-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--lp-gray-soft);
+}
+
+.lp-stat-value {
+    margin-top: 0.4rem;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--lp-ink);
+}
+
+.lp-stat-note {
+    margin-top: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--lp-gray-soft);
+}
+
+.lp-note-up { color: var(--lp-red); }
+.lp-note-good { color: var(--lp-green); }
+
+.lp-categories {
+    margin-top: 16px;
+    padding: 1.6rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.lp-cat-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.lp-cat-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--lp-gray);
+    text-align: left;
+}
+
+.lp-cat-track {
+    height: 12px;
+    background: var(--lp-track);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.lp-cat-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.lp-fill-food { background: #f5a022; }
+.lp-fill-travel { background: #3988db; }
+.lp-fill-bills { background: #8173e8; }
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                          */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 900px) {
+    .lp-hero { padding: 4rem 1.25rem 4.5rem; }
+    .lp-title { font-size: 56px; }
+    .lp-subtitle { font-size: 22px; }
+    .lp-preview { margin-top: 3.5rem; padding: 22px; }
+    .lp-stat-value { font-size: 1.75rem; }
+}
+
+@media (max-width: 640px) {
+    .lp-hero { padding: 3rem 1rem 3.5rem; }
+    .lp-badge { font-size: 0.85rem; }
+    .lp-title { font-size: 40px; margin-top: 1.5rem; }
+    .lp-subtitle { font-size: 18px; margin-top: 1.25rem; }
+
+    .lp-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 12px;
+        margin-top: 2rem;
+    }
+
+    .lp-btn { height: 58px; width: 100%; }
+
+    .lp-preview { padding: 16px; border-radius: 20px; margin-top: 2.75rem; }
+    .lp-stats { grid-template-columns: 1fr; gap: 12px; }
+    .lp-categories { padding: 1.25rem; margin-top: 12px; }
+    .lp-cat-row { grid-template-columns: 64px 1fr; gap: 0.75rem; }
+}
