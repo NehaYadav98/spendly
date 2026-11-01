@@ -48,6 +48,9 @@ Python 3.10+ assumed — f-strings and match statements are fine
 
 ## Commands
 
+# Run everything below from the app folder, with the venv active
+cd expense-tracker
+
 # Setup
 python -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
@@ -72,7 +75,7 @@ pytest -s
 
 |Route | Status |
 |`GET /` |	Implemented — renders `landing.html` |
-|`GET /register` | Implemented — renders `register.html` |
+|`GET, POST /register` | Implemented — renders `register.html`, creates the user on POST |
 |`GET /login` | Implemented — renders `login.html` |
 |`GET /logout` |	Stub — Step 3 |
 |`GET /profile` |	Stub — Step 4 |
