@@ -76,3 +76,19 @@ def seed_db():
             )
     finally:
         conn.close()
+
+
+def create_user(name, email, password):
+    """Return the new user's id, or None if the email is already registered."""
+    conn = get_db()
+    try:
+        with conn:
+            cursor = conn.execute(
+                "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+                (name, email, generate_password_hash(password)),
+            )
+        return cursor.lastrowid
+    except sqlite3.IntegrityError:
+        return None
+    finally:
+        conn.close()
