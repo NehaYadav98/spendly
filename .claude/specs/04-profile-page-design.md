@@ -3,7 +3,7 @@
 ## Overview
 Give a signed-in user one page that shows who they are and where their money went: an identity card, three summary stats, their latest transactions and spending by category. Later expense steps (7 to 9) will feed this page, so it comes straight after login and before them.
 
-This document describes the design as built, in the same way as the Step 3 spec. The page reads real data through `database/db.py`. It replaces the earlier draft, which asked for hardcoded data and is currently saved over `01-database-setup.md`.
+This document describes the design as built, in the same way as the Step 3 spec. The page reads real data through `database/db.py`. It replaces the earlier draft, which asked for hardcoded data. Wiring the page to the database is therefore already done, so the planned Step 5 needs re-scoping.
 
 ## Depends on
 - Step 1 (Database setup): `users` and `expenses` tables, `get_db()`
@@ -31,17 +31,17 @@ The page uses these read helpers in `database/db.py`. Each one filters by `user_
 
 ## Templates
 - Create: `templates/profile.html`, extending `base.html` and loading `css/profile.css` through `{% block head %}`
-- Modify: `templates/base.html`, adding a `Profile` nav link with `class="nav-profile"` for signed-in users
+- Modify: `templates/base.html`, adding a `Profile` nav link with `class="nav-profile"` for signed-in users, inside a `nav_user` block that `profile.html` overrides with the user's name
 
 ### Layout
-One centred column, `max-width: 960px`, with four parts in this order and a `1rem` gap between them.
+Centred at `--max-width`, so cards line up with the navbar, with a `1rem` gap between parts. The identity card is full width, then three equal stat cards in one row. Below them, Recent Transactions (68%) and By Category (32%) sit side by side. They stack at 900px and narrower.
 
 | Part | Content | Empty state |
 | --- | --- | --- |
 | Identity card | Avatar, name, email, `Member since March 2025` | Not applicable |
 | Stats row | Total spent, Transactions, Top category | `₹0.00`, `0`, `None yet` |
 | Recent Transactions | Date, Description, Category badge, Amount | `No transactions yet.` with no table |
-| Spending by Category | Name, bar, amount | `No spending to show yet.` |
+| By Category | Name and amount on one line, bar below | `No spending to show yet.` |
 
 - **Avatar:** first letter of the first and last words of the name, uppercase, or one letter for a single-word name. It is `aria-hidden` because the name sits beside it.
 - **Dates:** `09 Mar 2026`, through the `short_date` filter.
@@ -50,18 +50,19 @@ One centred column, `max-width: 960px`, with four parts in this order and a `1re
 - **Zero spending:** the category section shows its empty message when the total is 0, which also prevents dividing by zero.
 
 ### Visual rules
-- **Cards:** `--paper-card` background, `1px` `--border` border, `--radius-md` corners, soft shadow, `1.5rem` padding
-- **Type:** `--font-display` for stat values and card titles. Uppercase `0.72rem` muted labels for stat labels and table headers.
+- **Cards:** `--paper-card` background, `1px` `--border` border, `--radius-md` (`10px`) corners, soft shadow, `1.5rem` padding
+- **Spacing and sizes:** multiples of 4px for row and badge spacing, and the type scale 12 / 14 / 16 / 20 / 24px, with stat values up to 32px
+- **Table:** a divider under the Recent Transactions heading, separators between rows and a highlight on row hover
+- **Type:** `--font-display` for stat values and card titles. Uppercase `0.75rem` muted labels for stat labels, which sit above their values, and table headers.
 - **Numbers:** table and category amounts are right-aligned with `tabular-nums`
 - **Badges:** one pill per category with its own background and text colour tokens: Food, Transport, Bills, Health, Entertainment and Shopping. Any other category, including `Other`, uses the default grey.
-- **Palette:** `profile.css` redefines `--paper`, `--accent`, `--border` and `--border-soft` in `:root`. It loads on this page only, so the navbar, footer and toast take these colours here and nowhere else.
-- **Navbar on this page:** the `Profile` link is hidden and `Sign out` appears as plain text
+- **Palette:** `profile.css` sets background `#f7f7f7`, cards `#ffffff`, green `#174c35`, text `#171717`, secondary text `#777777` and border `#e5e5e5` as tokens in `:root`. It loads on this page only, so the navbar, footer and toast take these colours here and nowhere else.
+- **Navbar on this page:** the user's name replaces the `Profile` link, shortened with an ellipsis if long, and `Sign out` appears as plain text. Other pages keep `Profile` and `Sign out`, so no per-request user lookup is needed.
 
 ### Phones (600px and narrower)
 - Stats stack in one column
 - The avatar shrinks to `56px`
 - Each transaction becomes two lines: description and amount, then date and badge
-- Each category bar gets its own full-width line
 - The table's `role` attributes stay, so it is still announced as a table after its `display` changes
 
 ## Files to change
@@ -69,7 +70,7 @@ Paths are relative to the app folder `expense-tracker/`, except `CLAUDE.md`, whi
 
 - `app.py`: real `profile()` view and the `short_date` template filter
 - `database/db.py`: the read helpers listed above
-- `templates/base.html`: `Profile` nav link
+- `templates/base.html`: `Profile` nav link inside the `nav_user` block
 - `static/css/style.css`: keep `.nav-profile` visible at 600px and narrower, and reduce the navbar's side padding there
 - `CLAUDE.md`: mark `GET /profile` as implemented
 
@@ -93,7 +94,7 @@ No new dependencies.
 - Category badges use CSS classes, not inline colours
 - All amounts use `₹`, never `$`
 - `url_for()` for every internal link
-- No JavaScript and no chart library: the bars are plain HTML and CSS
+- No JavaScript, chart library or icon library: the bars are plain HTML and CSS
 - Do not implement the `/expenses/*` stubs
 - Keep the app on port 5001
 
@@ -110,12 +111,13 @@ No new dependencies.
 - [ ] The avatar shows `DU` for the demo user
 - [ ] The three stats match the user's expenses, and all amounts show `₹`
 - [ ] Recent Transactions shows the latest five, newest first, with coloured category badges
-- [ ] Spending by Category is sorted highest first, and bar widths match each category's share
+- [ ] By Category is sorted highest first, and bar widths match each category's share
+- [ ] Above 900px, Recent Transactions and By Category sit side by side at roughly 68% and 32%, and they stack at 900px and narrower
 - [ ] A new user with no expenses sees `₹0.00`, `0`, `None yet` and both empty messages, with no error
 - [ ] Another user's expenses never appear
 - [ ] A name or description containing HTML is shown as text, not run
 - [ ] At 600px and narrower, stats stack, transactions take two lines, and the page does not scroll sideways
-- [ ] The `Profile` link shows in the nav on other pages when signed in, and is hidden on `/profile`
+- [ ] The `Profile` link shows in the nav on other pages when signed in, and `/profile` shows the user's name and `Sign out` instead
 - [ ] `css/profile.css` loads on `/profile` only
 - [ ] `profile.html` has no hardcoded internal URLs or hex values
 - [ ] `pytest tests/test_profile.py -v` passes

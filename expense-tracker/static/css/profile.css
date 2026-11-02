@@ -1,9 +1,13 @@
 /* This file loads only on the profile page, so these overrides don't affect other pages. */
 :root {
     --paper: #f7f7f7;
-    --accent: #174d36;
+    --paper-card: #ffffff;
+    --accent: #174c35;
+    --ink: #171717;
+    --ink-muted: #777777;
     --border: #e5e5e5;
     --border-soft: #efefef;
+    --radius-md: 10px;
 
     --badge-default-bg: #eeeeee;
     --badge-default-text: #4a4a4a;
@@ -14,19 +18,25 @@
     --badge-bills-bg: #fdecea;
     --badge-bills-text: #a93226;
     --badge-health-bg: #e3f1e9;
-    --badge-health-text: #174d36;
+    --badge-health-text: #174c35;
     --badge-entertainment-bg: #f3e8f7;
     --badge-entertainment-text: #6f3b85;
     --badge-shopping-bg: #fde8f1;
     --badge-shopping-text: #a02660;
 }
 
-/* Navbar on this page: logo on the left and plain-text Sign out on the right. */
-.nav-links .nav-profile { display: none; }
+/* Navbar on this page: logo on the left, then the user's name and plain-text Sign out on the right. */
+.nav-user {
+    max-width: 16rem;
+    overflow: hidden;
+    color: var(--ink);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 .nav-links .nav-cta {
     background: transparent !important;
-    color: var(--ink) !important;
+    color: var(--ink-muted) !important;
     padding: 0;
 }
 
@@ -36,8 +46,9 @@
     padding: 2rem 2rem 4rem;
 }
 
+/* Same width as the navbar, so the cards line up with the logo and Sign out. */
 .profile-inner {
-    max-width: 960px;
+    max-width: var(--max-width);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -69,7 +80,7 @@
     border-radius: 50%;
     background: var(--accent);
     color: var(--paper-card);
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     font-weight: 600;
 }
 
@@ -80,7 +91,7 @@
 }
 
 .profile-name {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     font-weight: 700;
     line-height: 1.3;
     color: var(--ink);
@@ -88,13 +99,13 @@
 }
 
 .profile-email {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--ink-muted);
     overflow-wrap: anywhere;
 }
 
 .profile-since {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--ink-muted);
 }
 
@@ -102,22 +113,18 @@
 
 .profile-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
 }
 
-/* The label comes first for screen readers, but displays under the value. */
 .profile-stat {
     display: flex;
-    flex-direction: column-reverse;
-    justify-content: flex-end;
-    gap: 0.25rem;
-    min-width: 0;
-    padding: 1.25rem;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .profile-stat dt {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--ink-muted);
     text-transform: uppercase;
@@ -127,32 +134,46 @@
 .profile-stat dd {
     font-family: var(--font-display);
     /* Scales down so long amounts and categories fit the narrow three-column cards. */
-    font-size: clamp(1.15rem, 3vw, 1.4rem);
+    font-size: clamp(1.5rem, 3vw, 2rem);
     line-height: 1.25;
     color: var(--ink);
     overflow-wrap: anywhere;
 }
 
-/* Recent transactions */
+/* Two columns: transactions and categories */
+
+.profile-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 68fr) minmax(0, 32fr);
+    align-items: start;
+    gap: 1rem;
+}
 
 .profile-card-title {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     font-family: var(--font-display);
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 400;
     color: var(--ink);
 }
 
+.profile-recent .profile-card-title {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+/* Recent transactions */
+
 .profile-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
 }
 
 .profile-table th {
     padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--border);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--ink-muted);
     text-align: left;
@@ -161,10 +182,12 @@
 }
 
 .profile-table td {
-    padding: 0.7rem 0.75rem;
+    padding: 0.75rem;
     border-bottom: 1px solid var(--border-soft);
     color: var(--ink);
 }
+
+.profile-table tbody tr:hover { background: var(--paper); }
 
 .profile-table tbody tr:last-child td { border-bottom: none; }
 
@@ -190,12 +213,13 @@
 
 .profile-badge {
     display: inline-block;
-    padding: 0.15rem 0.6rem;
+    padding: 0.25rem 0.5rem;
     border-radius: 999px;
     background: var(--badge-default-bg);
     color: var(--badge-default-text);
     font-size: 0.75rem;
     font-weight: 500;
+    line-height: 1;
     white-space: nowrap;
 }
 
@@ -207,35 +231,36 @@
 .badge-shopping { background: var(--badge-shopping-bg); color: var(--badge-shopping-text); }
 
 .profile-empty {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: var(--ink-muted);
 }
 
-/* Spending by category */
+/* By category */
 
 .profile-categories { list-style: none; }
 
+/* Name and amount share the first line, and the bar sits below them at full width. */
 .profile-category {
     display: grid;
-    grid-template-columns: 7rem 1fr 6.5rem;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0;
-    border-bottom: 1px solid var(--border-soft);
-    font-size: 0.9rem;
+    gap: 0.5rem 1rem;
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
 }
 
-.profile-category:last-child { border-bottom: none; }
+.profile-category:first-child { padding-top: 0; }
+.profile-category:last-child { padding-bottom: 0; }
 
 .category-name {
-    min-width: 0;
     color: var(--ink);
     overflow-wrap: anywhere;
 }
 
 .category-track {
+    grid-area: 2 / 1 / 2 / 3;
     height: 6px;
-    background: var(--border-soft);
+    background: var(--border);
     border-radius: 999px;
     overflow: hidden;
 }
@@ -251,24 +276,22 @@
 .category-amount {
     font-weight: 500;
     font-variant-numeric: tabular-nums;
-    text-align: right;
     white-space: nowrap;
+}
+
+/* Tablets: too narrow for the transaction table beside the categories. */
+@media (max-width: 900px) {
+    .profile-columns { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* Phones: stacked cards, and each transaction becomes two lines instead of four cramped columns. */
 @media (max-width: 600px) {
-    /* The bar gets its own full-width line, because it would be tiny between the name and amount. */
-    .profile-category {
-        grid-template-columns: 1fr auto;
-        gap: 0.4rem 1rem;
-    }
-
-    .category-track { grid-area: 2 / 1 / 2 / 3; }
+    .nav-user { max-width: 9rem; }
 
     .profile-section { padding: 1.25rem 1rem 3rem; }
     .profile-identity { gap: 1rem; }
-    .profile-avatar { width: 56px; height: 56px; font-size: 1.15rem; }
-    .profile-stats { grid-template-columns: 1fr; }
+    .profile-avatar { width: 56px; height: 56px; font-size: 1.25rem; }
+    .profile-stats { grid-template-columns: minmax(0, 1fr); }
 
     .profile-table,
     .profile-table tbody { display: block; }
@@ -280,7 +303,7 @@
         grid-template-columns: 1fr auto;
         align-items: center;
         gap: 0.25rem 1rem;
-        padding: 0.7rem 0;
+        padding: 0.75rem 0;
         border-bottom: 1px solid var(--border-soft);
     }
 
@@ -295,6 +318,6 @@
 
     .profile-table .cell-description { grid-area: 1 / 1; font-weight: 500; }
     .profile-table .cell-amount { grid-area: 1 / 2; }
-    .profile-table .cell-date { grid-area: 2 / 1; font-size: 0.8rem; }
+    .profile-table .cell-date { grid-area: 2 / 1; font-size: 0.75rem; }
     .profile-table .cell-category { grid-area: 2 / 2; justify-self: end; }
 }

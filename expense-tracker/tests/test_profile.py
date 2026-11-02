@@ -187,7 +187,7 @@ def test_spending_by_category_is_sorted_with_bars_showing_share_of_total(signed_
     add_expense(user_id, 200, "Bills")
     add_expense(user_id, 100, "Bills")
     page = signed_in.get("/profile").data.decode()
-    section = page[page.index("Spending by Category"):]
+    section = page[page.index("By Category"):]
     assert section.index('category-name">Bills') < section.index('category-name">Food')
     assert 'style="width: 75.0%"' in section
     assert 'style="width: 25.0%"' in section
@@ -198,7 +198,7 @@ def test_spending_by_category_is_sorted_with_bars_showing_share_of_total(signed_
 def test_spending_by_category_tie_is_alphabetical(signed_in, user_id):
     add_expense(user_id, 100, "Food")
     add_expense(user_id, 100, "Bills")
-    section = signed_in.get("/profile").data.decode().split("Spending by Category")[1]
+    section = signed_in.get("/profile").data.decode().split("By Category")[1]
     assert section.index('category-name">Bills') < section.index('category-name">Food')
 
 
@@ -215,7 +215,7 @@ def test_spending_by_category_excludes_other_users(signed_in, user_id):
     other_id = create_user("Ravi", "ravi@example.com", PASSWORD)
     add_expense(other_id, 999, "Shopping")
     add_expense(user_id, 50, "Food")
-    section = signed_in.get("/profile").data.decode().split("Spending by Category")[1]
+    section = signed_in.get("/profile").data.decode().split("By Category")[1]
     assert 'category-name">Shopping' not in section
     assert 'style="width: 100.0%"' in section
 
@@ -224,6 +224,18 @@ def test_profile_styles_do_not_load_on_other_pages(signed_in):
     assert b"css/profile.css" in signed_in.get("/profile").data
     assert b"css/profile.css" not in signed_in.get("/").data
     assert b"css/profile.css" not in signed_in.get("/profile/edit").data
+
+
+def test_profile_nav_shows_name_and_sign_out_without_profile_link(signed_in):
+    page = signed_in.get("/profile").data.decode()
+    assert '<span class="nav-user">Asha Rao</span>' in page
+    assert "Sign out" in page
+    assert 'class="nav-profile"' not in page
+
+
+def test_columns_hold_transactions_then_categories(signed_in):
+    page = signed_in.get("/profile").data.decode()
+    assert page.index("profile-columns") < page.index("Recent Transactions") < page.index("By Category")
 
 
 def test_nav_link_only_when_signed_in(client, user_id):
