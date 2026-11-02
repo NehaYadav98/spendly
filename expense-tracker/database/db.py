@@ -157,3 +157,81 @@ def delete_session(token):
             conn.execute("DELETE FROM sessions WHERE token_hash = ?", (_hash_token(token),))
     finally:
         conn.close()
+
+
+def get_user_by_id(user_id):
+    """Return the user's public fields, or None. Leaves out password_hash on purpose."""
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT id, name, email, created_at FROM users WHERE id = ?",
+            (user_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+
+def update_user(user_id, name, email):
+    """Save a new name and email. Returns False if the email belongs to another user."""
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute(
+                "UPDATE users SET name = ?, email = ? WHERE id = ?",
+                (name, email, user_id),
+            )
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+
+def get_recent_expenses(user_id, limit=5):
+    """Return this user's latest expenses, newest date first, then newest added."""
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT date, description, category, amount FROM expenses "
+            "WHERE user_id = ? ORDER BY date DESC, id DESC LIMIT ?",
+            (user_id, limit),
+        ).fetchall()
+    finally:
+        conn.close()
+
+
+def get_spending_by_category(user_id):
+    """Return each category this user has spent in with its total, highest first."""
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT category, SUM(amount) AS total FROM expenses WHERE user_id = ? "
+            "GROUP BY category ORDER BY ROUND(SUM(amount), 2) DESC, category ASC",
+            (user_id,),
+        ).fetchall()
+    finally:
+        conn.close()
+
+
+def get_expense_summary(user_id):
+    """Return this user's total spend, expense count and highest-spend category."""
+    conn = get_db()
+    try:
+        totals = conn.execute(
+            "SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS count "
+            "FROM expenses WHERE user_id = ?",
+            (user_id,),
+        ).fetchone()
+        # ROUND stops floating-point noise from breaking a real tie.
+        top = conn.execute(
+            "SELECT category FROM expenses WHERE user_id = ? GROUP BY category "
+            "ORDER BY ROUND(SUM(amount), 2) DESC, category ASC LIMIT 1",
+            (user_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+    return {
+        "total": float(totals["total"]),
+        "count": totals["count"],
+        "top_category": top["category"] if top else None,
+    }

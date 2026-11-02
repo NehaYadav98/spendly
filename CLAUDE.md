@@ -76,12 +76,15 @@ pytest -s
 |Route | Status |
 |`GET /` |	Implemented — renders `landing.html` |
 |`GET, POST /register` | Implemented — renders `register.html`, creates the user on POST |
-|`GET /login` | Implemented — renders `login.html` |
-|`GET /logout` |	Stub — Step 3 |
-|`GET /profile` |	Stub — Step 4 |
+|`GET, POST /login` | Implemented — renders `login.html`, starts the session on POST |
+|`GET /logout` | Implemented — clears the session, shows a confirmation toast, redirects to `/` |
+|`GET /profile` |	Implemented — renders `profile.html` |
+|`GET, POST /profile/edit` | Implemented — renders `edit_profile.html`, saves name and email on POST |
 |`GET /expenses/add` |	Stub — Step 7 |
 |`GET /expenses/<id>/edit` |	Stub — Step 8 |
 |`GET /expenses/<id>/delete` |	Stub — Step 9 |
+
+Routes not listed in `PUBLIC_ENDPOINTS` in `app.py` require login, including the stubs above. A new public page must be added to that set. `/login` and `/register` redirect signed-in users to `/`.
 
 ## Do not implement a stub route unless the active task explicitly targets that step.**
 
