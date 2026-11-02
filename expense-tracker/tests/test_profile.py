@@ -1,6 +1,6 @@
 import pytest
 
-from database.db import create_user, get_db, get_recent_expenses, get_user_by_id
+from database.db import create_user, get_db, get_expenses, get_user_by_id
 
 EMAIL = "asha@example.com"
 PASSWORD = "secret-pass"
@@ -133,20 +133,24 @@ def test_avatar_initials(client, name, initials):
     assert f'aria-hidden="true">{initials}<' in client.get("/profile").data.decode()
 
 
-def test_recent_transactions_show_latest_five_newest_first(signed_in, user_id):
+def test_recent_transactions_show_all_rows_newest_first(signed_in, user_id):
     for day in range(1, 7):
         add_expense(user_id, day * 100, "Food", f"2026-03-0{day}", f"Item {day}")
     page = signed_in.get("/profile").data.decode()
-    positions = [page.index(f"Item {day}") for day in [6, 5, 4, 3, 2]]
+    positions = [page.index(f"Item {day}") for day in [6, 5, 4, 3, 2, 1]]
     assert positions == sorted(positions)
-    assert "Item 1" not in page
     assert "<dd>6</dd>" in page
+
+
+def test_category_bars_get_their_own_colour_class(signed_in, user_id):
+    add_expense(user_id, 100, "Shopping")
+    assert 'class="category-fill fill-shopping"' in signed_in.get("/profile").data.decode()
 
 
 def test_same_day_transactions_show_newest_added_first(signed_in, user_id):
     add_expense(user_id, 1, "Food", "2026-03-01", "First")
     add_expense(user_id, 2, "Food", "2026-03-01", "Second")
-    assert [row["description"] for row in get_recent_expenses(user_id)] == ["Second", "First"]
+    assert [row["description"] for row in get_expenses(user_id)] == ["Second", "First"]
 
 
 def test_transaction_row_contents(signed_in, user_id):

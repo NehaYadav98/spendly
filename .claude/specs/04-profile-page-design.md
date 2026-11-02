@@ -26,7 +26,7 @@ The page uses these read helpers in `database/db.py`. Each one filters by `user_
 | --- | --- |
 | `get_user_by_id(user_id)` | `id`, `name`, `email`, `created_at`, and never `password_hash` |
 | `get_expense_summary(user_id)` | `total`, `count`, `top_category` (`None` with no expenses) |
-| `get_recent_expenses(user_id, limit=5)` | Latest rows, by date descending, then id descending |
+| `get_expenses(user_id)` | All rows, by date descending, then id descending |
 | `get_spending_by_category(user_id)` | Category totals, highest first, ties alphabetical |
 
 ## Templates
@@ -34,7 +34,7 @@ The page uses these read helpers in `database/db.py`. Each one filters by `user_
 - Modify: `templates/base.html`, adding a `Profile` nav link with `class="nav-profile"` for signed-in users, inside a `nav_user` block that `profile.html` overrides with the user's name
 
 ### Layout
-Centred at `--max-width`, so cards line up with the navbar, with a `1rem` gap between parts. The identity card is full width, then three equal stat cards in one row. Below them, Recent Transactions (68%) and By Category (32%) sit side by side. They stack at 900px and narrower.
+Centred at 92% of the window width, with the navbar content at the same width and a `14px` gap between parts. The navbar is `40px` high. The identity card is full width and at least `102px` high, then three equal stat cards in one row. Below them, Recent Transactions (68%) and By Category (32%) sit side by side. They stack at 900px and narrower.
 
 | Part | Content | Empty state |
 | --- | --- | --- |
@@ -50,18 +50,18 @@ Centred at `--max-width`, so cards line up with the navbar, with a `1rem` gap be
 - **Zero spending:** the category section shows its empty message when the total is 0, which also prevents dividing by zero.
 
 ### Visual rules
-- **Cards:** `--paper-card` background, `1px` `--border` border, `--radius-md` (`10px`) corners, soft shadow, `1.5rem` padding
-- **Spacing and sizes:** multiples of 4px for row and badge spacing, and the type scale 12 / 14 / 16 / 20 / 24px, with stat values up to 32px
+- **Cards:** `--paper-card` background, `1px` `--border` border, `--radius-md` (`9px`) corners, soft shadow, `1rem 1.25rem` padding
+- **Spacing and sizes:** compact, with `13px` table and category text, `11px` labels, `18px` card titles, `20px` name and stat values up to `28px`
+- **Bar colours:** Shopping brown/gold, Other grey, Food dark green, Bills blue-grey, Health red, Entertainment purple, Transport blue, as `--bar-*` tokens and `fill-*` classes. Any other category uses `--accent`. The unfilled track is light grey.
 - **Table:** a divider under the Recent Transactions heading, separators between rows and a highlight on row hover
-- **Type:** `--font-display` for stat values and card titles. Uppercase `0.75rem` muted labels for stat labels, which sit above their values, and table headers.
+- **Type:** bold `--font-display` for the name, stat values and card titles. `--font-body` for navigation, labels and table content. Uppercase muted labels for stats, which sit above their values, and table headers.
 - **Numbers:** table and category amounts are right-aligned with `tabular-nums`
 - **Badges:** one pill per category with its own background and text colour tokens: Food, Transport, Bills, Health, Entertainment and Shopping. Any other category, including `Other`, uses the default grey.
-- **Palette:** `profile.css` sets background `#f7f7f7`, cards `#ffffff`, green `#174c35`, text `#171717`, secondary text `#777777` and border `#e5e5e5` as tokens in `:root`. It loads on this page only, so the navbar, footer and toast take these colours here and nowhere else.
+- **Palette:** `profile.css` sets background `#f7f7f7`, cards `#ffffff`, green `#174c35`, text `#111111`, secondary text `#777777` and border `#e5e5e5` as tokens in `:root`. It loads on this page only, so the navbar, footer and toast take these colours here and nowhere else.
 - **Navbar on this page:** the user's name replaces the `Profile` link, shortened with an ellipsis if long, and `Sign out` appears as plain text. Other pages keep `Profile` and `Sign out`, so no per-request user lookup is needed.
 
 ### Phones (600px and narrower)
 - Stats stack in one column
-- The avatar shrinks to `56px`
 - Each transaction becomes two lines: description and amount, then date and badge
 - The table's `role` attributes stay, so it is still announced as a table after its `display` changes
 
@@ -102,7 +102,7 @@ No new dependencies.
 - **Edit link:** the page has no link to `/profile/edit`, and `tests/test_profile.py` asserts that `Edit Profile` is absent. The edit form is therefore reachable only by typing its URL.
 - **Editing itself:** `/profile/edit` and `edit_profile.html` are built but have no spec of their own.
 - **Indian digit grouping:** amounts use `₹1,234,567.00`, not `₹12,34,567.00`.
-- **More transactions:** there is no "view all" page or pagination. The page shows the latest five.
+- **Paging:** the page shows every transaction, with no paging, so a long history makes a long page.
 - **Date filtering:** totals cover all time.
 
 ## Definition of done
@@ -110,8 +110,9 @@ No new dependencies.
 - [ ] Signing in as `demo@spendly.com` with password `demo123` and opening `/profile` returns 200 with the name, email and member-since date
 - [ ] The avatar shows `DU` for the demo user
 - [ ] The three stats match the user's expenses, and all amounts show `₹`
-- [ ] Recent Transactions shows the latest five, newest first, with coloured category badges
-- [ ] By Category is sorted highest first, and bar widths match each category's share
+- [ ] Recent Transactions shows every transaction, newest first, with coloured category badges
+- [ ] By Category is sorted highest first, and bar widths and colours match each category
+- [ ] The navbar is `40px` high, the identity card `102px` for a short name, and the content 92% of the window width with `14px` gaps and `9px` card corners
 - [ ] Above 900px, Recent Transactions and By Category sit side by side at roughly 68% and 32%, and they stack at 900px and narrower
 - [ ] A new user with no expenses sees `₹0.00`, `0`, `None yet` and both empty messages, with no error
 - [ ] Another user's expenses never appear

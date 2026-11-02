@@ -78,7 +78,7 @@
                     <li class="profile-category" title="{{ '{:.1f}'.format(share) }}% of total spending">
                         <span class="category-name">{{ row.category }}</span>
                         <div class="category-track" aria-hidden="true">
-                            <div class="category-fill" style="width: {{ '{:.1f}'.format(share) }}%"></div>
+                            <div class="category-fill fill-{{ row.category | lower }}" style="width: {{ '{:.1f}'.format(share) }}%"></div>
                         </div>
                         <span class="category-amount">₹{{ "{:,.2f}".format(row.total) }}</span>
                     </li>

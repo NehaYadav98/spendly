@@ -187,14 +187,15 @@ def update_user(user_id, name, email):
         conn.close()
 
 
-def get_recent_expenses(user_id, limit=5):
-    """Return this user's latest expenses, newest date first, then newest added."""
+def get_expenses(user_id):
+    """Return all of this user's expenses, newest date first, then newest added."""
     conn = get_db()
     try:
+        # shortcut: no paging, so a long history makes a long page; add paging if that becomes a problem.
         return conn.execute(
             "SELECT date, description, category, amount FROM expenses "
-            "WHERE user_id = ? ORDER BY date DESC, id DESC LIMIT ?",
-            (user_id, limit),
+            "WHERE user_id = ? ORDER BY date DESC, id DESC",
+            (user_id,),
         ).fetchall()
     finally:
         conn.close()

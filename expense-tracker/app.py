@@ -11,7 +11,7 @@ from database.db import (
     delete_session,
     get_db,
     get_expense_summary,
-    get_recent_expenses,
+    get_expenses,
     get_spending_by_category,
     get_user_by_id,
     init_db,
@@ -154,7 +154,7 @@ def profile():
         user=user,
         member_since=member_since,
         summary=get_expense_summary(user["id"]),
-        recent_expenses=get_recent_expenses(user["id"]),
+        recent_expenses=get_expenses(user["id"]),
         spending_by_category=get_spending_by_category(user["id"]),
     )
 
