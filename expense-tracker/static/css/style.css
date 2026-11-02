@@ -410,6 +410,34 @@ a { color: inherit; text-decoration: none; }
     margin-bottom: 1.5rem;
 }
 
+/* Sits just under the sticky navbar, then fades out after 3.5s. */
+.toast {
+    position: fixed;
+    top: 76px;
+    right: 1rem;
+    z-index: 200;
+    max-width: calc(100vw - 2rem);
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: toast-hide 0.3s ease 3.5s forwards;
+}
+
+@keyframes toast-hide {
+    to {
+        opacity: 0;
+        visibility: hidden;
+        max-height: 0;
+        margin-block: 0;
+        padding-block: 0;
+        border-width: 0;
+    }
+}
+
 .auth-error {
     background: var(--danger-light);
     color: var(--danger);
@@ -592,6 +620,15 @@ a { color: inherit; text-decoration: none; }
 /* ------------------------------------------------------------------ */
 
 @media (max-width: 900px) {
+    /* Takes its own space below the navbar here, because floating it would cover the hero badge. */
+    .toast {
+        position: static;
+        max-width: none;
+        max-height: 6rem;
+        margin: 0.75rem 1rem;
+        overflow: hidden;
+    }
+
     .hero {
         grid-template-columns: 1fr;
         text-align: center;

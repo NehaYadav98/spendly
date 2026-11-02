@@ -8,6 +8,12 @@
 
 {% block content %}
 
+{% if session.get('user_id') %}
+<div class="lp-welcome">
+    <p class="lp-welcome-text">Welcome back!</p>
+</div>
+{% endif %}
+
 <section class="lp-hero" aria-labelledby="lp-hero-title">
     <div class="lp-hero-inner">
         <p class="lp-badge">
