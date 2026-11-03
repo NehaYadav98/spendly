@@ -20,6 +20,7 @@
             </a>
             <div class="nav-links">
                 {% if session.get('user_id') %}
+                <a href="{{ url_for('profile') }}" class="nav-profile">Profile</a>
                 <a href="{{ url_for('logout') }}" class="nav-cta">Sign out</a>
                 {% else %}
                 <a href="{{ url_for('login') }}">Sign in</a>
@@ -32,6 +33,61 @@
     {% for message in get_flashed_messages() %}
     <div class="toast" role="status">{{ message }}</div>
     {% endfor %}
+
+    {% set prompt_email = session.pop('password_prompt_email', None) %}
+    {% if prompt_email %}
+    <dialog class="password-prompt" id="password-prompt" aria-labelledby="password-prompt-title">
+        <svg class="pp-art" viewBox="0 0 288 84" aria-hidden="true">
+            <defs>
+                <linearGradient id="pp-capsule" x1="0" x2="1">
+                    <stop offset="0" stop-color="#4c8df6"/>
+                    <stop offset="1" stop-color="#a77bf3"/>
+                </linearGradient>
+            </defs>
+            <rect x="40" y="10" width="10" height="10" rx="2" fill="#a77bf3" opacity=".7" transform="rotate(20 45 15)"/>
+            <polygon points="248,12 256,26 240,26" fill="#c58af9" opacity=".7"/>
+            <circle cx="30" cy="62" r="4" fill="#c58af9" opacity=".6"/>
+            <rect x="252" y="58" width="8" height="8" rx="1" fill="#a77bf3" opacity=".6" transform="rotate(45 256 62)"/>
+            <rect x="64" y="28" width="150" height="34" rx="17" fill="url(#pp-capsule)"/>
+            <g fill="#fff">
+                <circle cx="86" cy="45" r="4"/><circle cx="102" cy="45" r="4"/><circle cx="118" cy="45" r="4"/>
+                <circle cx="134" cy="45" r="4"/><circle cx="150" cy="45" r="4"/><circle cx="166" cy="45" r="4"/>
+            </g>
+            <path d="M214 20 l22 8 v14 c0 14 -10 22 -22 26 c-12 -4 -22 -12 -22 -26 v-14 z" fill="#1a73e8" stroke="#202124" stroke-width="3"/>
+            <path d="M204 44 l7 7 l13 -14" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+
+        <h2 class="pp-title" id="password-prompt-title">
+            <span class="pp-icon" aria-hidden="true">◈</span>Update password?
+        </h2>
+
+        <div class="pp-row">
+            <span class="pp-label">Username</span>
+            <span class="pp-field">
+                <span class="pp-value">{{ prompt_email }}</span>
+                <svg class="pp-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+            </span>
+        </div>
+        <div class="pp-row">
+            <span class="pp-label">Password</span>
+            <span class="pp-field">
+                <span class="pp-value pp-dots" aria-label="Password hidden">••••••••••</span>
+            </span>
+        </div>
+
+        <div class="pp-actions">
+            <form method="dialog">
+                <button type="submit" class="pp-btn pp-btn-secondary" autofocus>No, thanks</button>
+            </form>
+            <a href="{{ url_for('change_password') }}" class="pp-btn pp-btn-primary">Update Password</a>
+        </div>
+
+        <p class="pp-footer">
+            Your Spendly password is stored encrypted for {{ prompt_email }}. You can change it anytime in
+            <a href="{{ url_for('change_password') }}">password settings</a>.
+        </p>
+    </dialog>
+    {% endif %}
 
     <main class="main-content">
         {% block content %}{% endblock %}

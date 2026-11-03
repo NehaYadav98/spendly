@@ -3,20 +3,6 @@
 /* Scoped with the lp- prefix so it never collides with style.css.     */
 /* ------------------------------------------------------------------ */
 
-/* Same side padding and max-width as .navbar/.nav-inner, so the text lines up with the logo. */
-.lp-welcome {
-    background: var(--paper-card);
-    padding: 1rem 2rem 0;
-}
-
-.lp-welcome-text {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    color: var(--ink);
-    font-size: 1rem;
-    font-weight: 500;
-}
-
 .lp-hero {
     --lp-ink: #111111;
     --lp-green: #4b9c78;

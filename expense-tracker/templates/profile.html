@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Your Profile — Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="profile-section">
+    <div class="profile-inner">
+
+        <div class="profile-card profile-identity">
+            {% set name_parts = user.name.split() %}
+            <div class="profile-avatar" aria-hidden="true">{{ name_parts[0][0] | upper }}{% if name_parts | length > 1 %}{{ name_parts[-1][0] | upper }}{% endif %}</div>
+            <div class="profile-details">
+                <h1 class="profile-name">{{ user.name }}</h1>
+                <p class="profile-email">{{ user.email }}</p>
+                <p class="profile-since">Member since {{ member_since }}</p>
+            </div>
+        </div>
+
+        <dl class="profile-stats">
+            <div class="profile-card profile-stat">
+                <dt>Total spent</dt>
+                <dd>₹{{ "{:,.2f}".format(summary.total) }}</dd>
+            </div>
+            <div class="profile-card profile-stat">
+                <dt>Transactions</dt>
+                <dd>{{ summary.count }}</dd>
+            </div>
+            <div class="profile-card profile-stat">
+                <dt>Top category</dt>
+                <dd>{{ summary.top_category or "None yet" }}</dd>
+            </div>
+        </dl>
+
+        <div class="profile-card profile-recent">
+            <h2 id="recent-heading" class="profile-card-title">Recent Transactions</h2>
+            {% if recent_expenses %}
+            {# The roles keep this announced as a table when the phone layout changes its display. #}
+            <table class="profile-table" role="table" aria-labelledby="recent-heading">
+                <thead role="rowgroup">
+                    <tr role="row">
+                        <th scope="col" role="columnheader">Date</th>
+                        <th scope="col" role="columnheader">Description</th>
+                        <th scope="col" role="columnheader">Category</th>
+                        <th scope="col" role="columnheader" class="cell-amount">Amount</th>
+                    </tr>
+                </thead>
+                <tbody role="rowgroup">
+                    {% for expense in recent_expenses %}
+                    <tr role="row">
+                        <td role="cell" class="cell-date">{{ expense.date | short_date }}</td>
+                        <td role="cell" class="cell-description">{{ expense.description or "—" }}</td>
+                        <td role="cell" class="cell-category"><span class="profile-badge badge-{{ expense.category | lower }}">{{ expense.category }}</span></td>
+                        <td role="cell" class="cell-amount">₹{{ "{:,.2f}".format(expense.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="profile-empty">No transactions yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="profile-card">
+            <h2 id="category-heading" class="profile-card-title">Spending by Category</h2>
+            {# summary.total also guards the division if every amount is zero. #}
+            {% if spending_by_category and summary.total %}
+            <ul class="profile-categories" aria-labelledby="category-heading">
+                {% for row in spending_by_category %}
+                {% set share = row.total / summary.total * 100 %}
+                <li class="profile-category" title="{{ '{:.1f}'.format(share) }}% of total spending">
+                    <span class="category-name">{{ row.category }}</span>
+                    <div class="category-track" aria-hidden="true">
+                        <div class="category-fill" style="width: {{ '{:.1f}'.format(share) }}%"></div>
+                    </div>
+                    <span class="category-amount">₹{{ "{:,.2f}".format(row.total) }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="profile-empty">No spending to show yet.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
