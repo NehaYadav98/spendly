@@ -1,7 +1,8 @@
 import os
 import secrets
+from datetime import datetime
 
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
 
 from database.db import (
     authenticate_user,
@@ -9,14 +10,22 @@ from database.db import (
     create_user,
     delete_session,
     get_db,
+    get_expense_summary,
+    get_recent_expenses,
+    get_spending_by_category,
+    get_user_by_id,
     init_db,
     is_session_active,
     seed_db,
+    update_password,
+    update_user,
 )
 
 app = Flask(__name__)
 # Random fallback keeps a real key out of the repo; set SECRET_KEY so sessions survive restarts.
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+# Stops other sites from submitting signed-in forms such as the profile edit, since forms have no CSRF token.
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 with app.app_context():
     init_db()
@@ -38,7 +47,7 @@ def enforce_session():
     if request.endpoint and request.endpoint not in PUBLIC_ENDPOINTS and not session.get("user_id"):
         return redirect(url_for("login"))
     if request.endpoint in GUEST_ONLY_ENDPOINTS and session.get("user_id"):
-        return redirect(url_for("landing"))
+        return redirect(url_for("profile"))
 
 
 @app.after_request
@@ -47,6 +56,24 @@ def disable_page_cache(response):
     if request.endpoint != "static":
         response.headers["Cache-Control"] = "no-store"
     return response
+
+
+def validate_name_and_email(name, email):
+    """Return an error message for the form, or None if both values are valid."""
+    local_part, _, domain = email.partition("@")
+    if not name:
+        return "Please enter your name."
+    if len(name) > 100:
+        return "Name must be 100 characters or fewer."
+    # shortcut: only checks for text around @, add email verification for a real check.
+    if not (local_part and domain) or len(email) > 254:
+        return "Please enter a valid email address."
+    return None
+
+
+@app.template_filter()
+def short_date(value):
+    return datetime.fromisoformat(value).strftime("%d %b %Y")
 
 
 # ------------------------------------------------------------------ #
@@ -66,21 +93,16 @@ def register():
     name = request.form.get("name", "").strip()
     email = request.form.get("email", "").strip().lower()
     password = request.form.get("password", "")
-    local_part, _, domain = email.partition("@")
 
-    if not name:
-        error = "Please enter your name."
-    # shortcut: only checks for text around @, add email verification for a real check.
-    elif not (local_part and domain):
-        error = "Please enter a valid email address."
-    elif len(password) < 8:
+    error = validate_name_and_email(name, email)
+    if not error and len(password) < 8:
         error = "Password must be at least 8 characters."
-    elif create_user(name, email, password) is None:
+    if not error and create_user(name, email, password) is None:
         error = "That email is already registered."
-    else:
-        return redirect(url_for("login"))
+    if error:
+        return render_template("register.html", error=error), 400
 
-    return render_template("register.html", error=error), 400
+    return redirect(url_for("login"))
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -99,7 +121,9 @@ def login():
     session.clear()
     session["user_id"] = user["id"]
     session["session_token"] = create_session(user["id"])
-    return redirect(url_for("landing"))
+    # base.html pops this on the next page, so the password popup shows once per sign-in.
+    session["password_prompt_email"] = user["email"]
+    return redirect(url_for("profile"))
 
 
 @app.route("/logout")
@@ -122,14 +146,77 @@ def privacy():
     return render_template("privacy.html")
 
 
+@app.route("/profile")
+def profile():
+    user = get_user_by_id(session["user_id"])
+    if user is None:
+        abort(404)
+    member_since = datetime.fromisoformat(user["created_at"]).strftime("%B %Y")
+    return render_template(
+        "profile.html",
+        user=user,
+        member_since=member_since,
+        summary=get_expense_summary(user["id"]),
+        recent_expenses=get_recent_expenses(user["id"]),
+        spending_by_category=get_spending_by_category(user["id"]),
+    )
+
+
+@app.route("/profile/edit", methods=["GET", "POST"])
+def edit_profile():
+    user = get_user_by_id(session["user_id"])
+    if user is None:
+        abort(404)
+    if request.method == "GET":
+        return render_template("edit_profile.html", user=user)
+
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip().lower()
+    current_password = request.form.get("current_password", "")
+
+    error = validate_name_and_email(name, email)
+    # Email is the login, so changing it needs the password. Checked first so the "taken" error can't be probed.
+    if not error and email != user["email"] and authenticate_user(user["email"], current_password) is None:
+        error = "Enter your current password to change your email."
+    if not error and not update_user(user["id"], name, email):
+        error = "That email is already registered."
+    if error:
+        return render_template("edit_profile.html", user=user, error=error), 400
+
+    flash("Your profile has been updated.")
+    return redirect(url_for("profile"))
+
+
+@app.route("/profile/password", methods=["GET", "POST"])
+def change_password():
+    user = get_user_by_id(session["user_id"])
+    if user is None:
+        abort(404)
+    if request.method == "GET":
+        return render_template("change_password.html")
+
+    current_password = request.form.get("current_password", "")
+    new_password = request.form.get("new_password", "")
+    confirm_password = request.form.get("confirm_password", "")
+
+    error = None
+    if authenticate_user(user["email"], current_password) is None:
+        error = "Your current password is incorrect."
+    elif len(new_password) < 8:
+        error = "New password must be at least 8 characters."
+    elif new_password != confirm_password:
+        error = "New passwords do not match."
+    if error:
+        return render_template("change_password.html", error=error), 400
+
+    update_password(user["id"], new_password, session["session_token"])
+    flash("Your password has been updated.")
+    return redirect(url_for("profile"))
+
+
 # ------------------------------------------------------------------ #
 # Placeholder routes — students will implement these                  #
 # ------------------------------------------------------------------ #
-
-@app.route("/profile")
-def profile():
-    return "Profile page — coming in Step 4"
-
 
 @app.route("/expenses/add")
 def add_expense():

@@ -26,10 +26,10 @@ def test_get_shows_form(client):
     assert b"Welcome back" in response.data
 
 
-def test_correct_credentials_start_session_and_redirect_home(client, user_id):
+def test_correct_credentials_start_session_and_redirect_to_profile(client, user_id):
     response = sign_in(client)
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/")
+    assert response.headers["Location"].endswith("/profile")
     assert session_user_id(client) == user_id
 
 
@@ -160,11 +160,11 @@ def test_cookie_from_before_logout_cannot_be_reused(app, client, user_id):
 
 
 @pytest.mark.parametrize("path", ["/login", "/register"])
-def test_guest_pages_redirect_home_when_signed_in(client, user_id, path):
+def test_guest_pages_redirect_to_profile_when_signed_in(client, user_id, path):
     sign_in(client)
     response = client.get(path)
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/")
+    assert response.headers["Location"].endswith("/profile")
 
 
 def test_login_post_when_signed_in_starts_no_new_session(client, user_id):
@@ -293,4 +293,4 @@ def test_nav_when_signed_in(client, user_id):
     page = client.get("/").data
     assert b"Sign out" in page
     assert b"Sign in" not in page
-    assert b"Welcome back!" in page
+    assert b"Welcome back!" not in page
