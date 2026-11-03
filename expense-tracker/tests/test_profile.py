@@ -39,7 +39,7 @@ def save(client, **overrides):
 # Viewing                                                             #
 # ------------------------------------------------------------------ #
 
-@pytest.mark.parametrize("path", ["/profile", "/profile/edit"])
+@pytest.mark.parametrize("path", ["/profile", "/profile/edit", "/profile/password"])
 def test_signed_out_get_redirects_to_login(client, path):
     response = client.get(path)
     assert response.status_code == 302
@@ -326,3 +326,58 @@ def test_edit_only_changes_the_signed_in_user(signed_in):
 def test_session_cookie_is_samesite_lax(client, user_id):
     response = client.post("/login", data={"email": EMAIL, "password": PASSWORD})
     assert "SameSite=Lax" in response.headers["Set-Cookie"]
+
+
+# ------------------------------------------------------------------ #
+# Changing password                                                   #
+# ------------------------------------------------------------------ #
+
+NEW_PASSWORD = "brand-new-pass"
+
+
+def change_password(client, **overrides):
+    data = {
+        "current_password": PASSWORD,
+        "new_password": NEW_PASSWORD,
+        "confirm_password": NEW_PASSWORD,
+        **overrides,
+    }
+    return client.post("/profile/password", data=data)
+
+
+def can_log_in(app, password):
+    return app.test_client().post("/login", data={"email": EMAIL, "password": password}).status_code == 302
+
+
+@pytest.mark.parametrize(
+    "overrides, message",
+    [
+        ({"current_password": "wrong-pass"}, b"current password is incorrect"),
+        ({"new_password": "short", "confirm_password": "short"}, b"at least 8 characters"),
+        ({"confirm_password": "different-pass"}, b"do not match"),
+    ],
+)
+def test_bad_password_change_is_rejected(app, signed_in, overrides, message):
+    response = change_password(signed_in, **overrides)
+    assert response.status_code == 400
+    assert message in response.data
+    assert can_log_in(app, PASSWORD)
+
+
+def test_password_change_moves_the_login(app, signed_in):
+    response = change_password(signed_in)
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/profile")
+    assert b"Your password has been updated." in signed_in.get("/profile").data
+    assert can_log_in(app, NEW_PASSWORD)
+    assert not can_log_in(app, PASSWORD)
+
+
+def test_password_change_signs_out_other_sessions_only(app, signed_in):
+    other = app.test_client()
+    other.post("/login", data={"email": EMAIL, "password": PASSWORD})
+    assert other.get("/profile").status_code == 200
+
+    change_password(signed_in)
+    assert other.get("/profile").headers["Location"].endswith("/login")
+    assert signed_in.get("/profile").status_code == 200
